@@ -1,0 +1,700 @@
+{
+	"info": {
+		"_postman_id": "56ebe1eb-8387-4251-9cb5-ec98be27d9f6",
+		"name": "restful-api test",
+		"schema": "https://schema.getpostman.com/json/collection/v2.0.0/collection.json"
+	},
+	"item": [
+		{
+			"name": "Get Objects",
+			"item": [
+				{
+					"name": "Get Objects",
+					"event": [
+						{
+							"listen": "test",
+							"script": {
+								"id": "171c8162-00e2-4c4e-8202-c6520a706ff4",
+								"exec": [
+									"var jsonData = pm.response.json();\r",
+									"\r",
+									"pm.test(\"Status Code is 200\", function () {\r",
+									"    // Ensure the response was successful\r",
+									"    pm.response.to.have.status(200);\r",
+									"});\r",
+									"\r",
+									"pm.test(\"Response is not empty\", function () {\r",
+									"    // Make sure the response is not empty\r",
+									"    pm.expect(jsonData).to.not.have.lengthOf(0);\r",
+									"});\r",
+									""
+								],
+								"type": "text/javascript"
+							}
+						}
+					],
+					"id": "cf2ffec7-0677-4ea0-901a-b34f7ca1c106",
+					"protocolProfileBehavior": {
+						"disableBodyPruning": true,
+						"disabledSystemHeaders": {
+							"host": true,
+							"user-agent": true,
+							"accept": true,
+							"accept-encoding": true,
+							"connection": true
+						}
+					},
+					"request": {
+						"auth": {
+							"type": "noauth"
+						},
+						"method": "GET",
+						"header": [],
+						"url": "{{api_url}}/objects"
+					},
+					"response": []
+				},
+				{
+					"name": "Get Invalid Object",
+					"event": [
+						{
+							"listen": "test",
+							"script": {
+								"id": "171c8162-00e2-4c4e-8202-c6520a706ff4",
+								"exec": [
+									"var jsonData = pm.response.json();\r",
+									"\r",
+									"pm.test(\"Status Code is 404\", function () {\r",
+									"    // Ensure the response was successful\r",
+									"    pm.response.to.have.status(404);\r",
+									"});\r",
+									"\r",
+									"pm.test(\"Response is not found error\", function () {\r",
+									"    // Make sure the response is not empty\r",
+									"    pm.expect(jsonData.error).is.equal(\"Oject with id=0 was not found.\");\r",
+									"});\r",
+									""
+								],
+								"type": "text/javascript"
+							}
+						}
+					],
+					"id": "f69bc532-614e-4eb6-b8ed-3971e9809810",
+					"protocolProfileBehavior": {
+						"disableBodyPruning": true,
+						"disabledSystemHeaders": {
+							"host": true,
+							"user-agent": true,
+							"accept": true,
+							"accept-encoding": true,
+							"connection": true
+						}
+					},
+					"request": {
+						"auth": {
+							"type": "noauth"
+						},
+						"method": "GET",
+						"header": [],
+						"url": "{{api_url}}/objects/0"
+					},
+					"response": []
+				},
+				{
+					"name": "Get Valid Object",
+					"event": [
+						{
+							"listen": "prerequest",
+							"script": {
+								"id": "db7ed652-0aff-4a32-8fd6-f66bb8cae4b0",
+								"exec": [
+									"const createObject = {\r",
+									"  url: pm.environment.get(\"api_url\") + \"/objects\",\r",
+									"  method: 'POST',\r",
+									"  header: 'Content-Type:application/json',\r",
+									"  body: {\r",
+									"    mode: 'raw',\r",
+									"    raw: JSON.stringify({ \r",
+									"        \"name\": pm.variables.replaceIn(\"{{$randomCatchPhrase}}\"), \r",
+									"        \"data\": {\r",
+									"            \"year\": pm.variables.replaceIn(\"{{$randomInt}}\"),\r",
+									"            \"price\": pm.variables.replaceIn(\"{{$randomPrice}}\"),\r",
+									"            \"email\" : pm.variables.replaceIn(\"{{$randomEmail}}\"),\r",
+									"            \"CPU model\": pm.variables.replaceIn(\"{{$randomProductName}}\")\r",
+									"        }\r",
+									"    })\r",
+									"  }\r",
+									"};\r",
+									"\r",
+									"pm.sendRequest(createObject, function (err, res) {\r",
+									"    if (err) {\r",
+									"        console.log(err);\r",
+									"    }\r",
+									"\r",
+									"    pm.expect(err).is.null;\r",
+									"    pm.variables.set(\"new_object_id\", res.json().id)\r",
+									"});"
+								],
+								"type": "text/javascript"
+							}
+						},
+						{
+							"listen": "test",
+							"script": {
+								"id": "4f19f193-6d60-4c79-b1cb-1f5ff5f57dc9",
+								"exec": [
+									"var jsonData = pm.response.json();\r",
+									"\r",
+									"pm.test(\"Status Code is 200\", function () {\r",
+									"    // Ensure the response was successful\r",
+									"    pm.response.to.have.status(200);\r",
+									"});\r",
+									"\r",
+									"// use lodash map to get a flat array of all the returned object ids\r",
+									"var object_ids = _.map(jsonData, 'id');\r",
+									"\r",
+									"pm.test(\"Expected Object guid is in the returned array\", function () {\r",
+									"    pm.expect(object_ids).to.include(pm.variables.get(\"object_id\"));\r",
+									"});"
+								],
+								"type": "text/javascript"
+							}
+						}
+					],
+					"id": "40b2a3f7-c8d2-4889-9de5-781f55427053",
+					"protocolProfileBehavior": {
+						"disableBodyPruning": true,
+						"disabledSystemHeaders": {
+							"host": true,
+							"user-agent": true,
+							"accept": true,
+							"accept-encoding": true,
+							"connection": true
+						}
+					},
+					"request": {
+						"auth": {
+							"type": "noauth"
+						},
+						"method": "GET",
+						"header": [],
+						"body": {
+							"mode": "formdata",
+							"formdata": []
+						},
+						"url": "{{api_url}}/objects/{{new_object_id}}"
+					},
+					"response": []
+				}
+			],
+			"id": "a38bb590-6848-48da-8562-b48c326f25a7"
+		},
+		{
+			"name": "Get Object by ID",
+			"item": [
+				{
+					"name": "Get Non-Existing Object",
+					"event": [
+						{
+							"listen": "prerequest",
+							"script": {
+								"id": "db7ed652-0aff-4a32-8fd6-f66bb8cae4b0",
+								"exec": [
+									""
+								],
+								"type": "text/javascript"
+							}
+						},
+						{
+							"listen": "test",
+							"script": {
+								"id": "4f19f193-6d60-4c79-b1cb-1f5ff5f57dc9",
+								"exec": [
+									"var jsonData = pm.response.json();\r",
+									"\r",
+									"pm.test(\"Status Code is 200\", function () {\r",
+									"    // Ensure the response was successful\r",
+									"    pm.response.to.have.status(200);\r",
+									"});\r",
+									"\r",
+									"pm.test(\"Response is empty\", function () {\r",
+									"    // Ensure the response was empty\r",
+									"    pm.expect(jsonData).to.be.empty;\r",
+									"});"
+								],
+								"type": "text/javascript"
+							}
+						}
+					],
+					"id": "1835f71b-f7a8-4ef9-a61c-ac81466f3957",
+					"protocolProfileBehavior": {
+						"disableBodyPruning": true,
+						"disabledSystemHeaders": {
+							"host": true,
+							"user-agent": true,
+							"accept": true,
+							"accept-encoding": true,
+							"connection": true
+						}
+					},
+					"request": {
+						"auth": {
+							"type": "noauth"
+						},
+						"method": "GET",
+						"header": [],
+						"body": {
+							"mode": "formdata",
+							"formdata": []
+						},
+						"url": {
+							"raw": "{{api_url}}/objects?id=0",
+							"host": [
+								"{{api_url}}"
+							],
+							"path": [
+								"objects"
+							],
+							"query": [
+								{
+									"key": "id",
+									"value": "0"
+								}
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "Get Multiple Object IDs",
+					"event": [
+						{
+							"listen": "prerequest",
+							"script": {
+								"id": "db7ed652-0aff-4a32-8fd6-f66bb8cae4b0",
+								"exec": [
+									""
+								],
+								"type": "text/javascript"
+							}
+						},
+						{
+							"listen": "test",
+							"script": {
+								"id": "4f19f193-6d60-4c79-b1cb-1f5ff5f57dc9",
+								"exec": [
+									"pm.test(\"Status Code is 200\", function () {\r",
+									"    // Ensure the response was successful\r",
+									"    pm.response.to.have.status(200);\r",
+									"});\r",
+									"\r",
+									"pm.test(\"Response is contains id=1,2\", function ()  {\r",
+									"    var jsonData = pm.response.json(),\r",
+									"        ids = _.map(jsonData, ({ id }) => ( id )); \r",
+									"        // This will store your ids in an array. For reference (https://lodash.com/docs/4.17.11#map)\r",
+									" \r",
+									"    // ids returned should contain 1 and 2\r",
+									"    console.log([...ids.entries()]);  \r",
+									"    pm.expect(ids).contains('1');\r",
+									"    pm.expect(ids).contains('2');\r",
+									"});"
+								],
+								"type": "text/javascript"
+							}
+						}
+					],
+					"id": "a46363c7-b5ab-4c3e-8cf8-115e7a9af0b2",
+					"protocolProfileBehavior": {
+						"disableBodyPruning": true,
+						"disabledSystemHeaders": {
+							"host": true,
+							"user-agent": true,
+							"accept": true,
+							"accept-encoding": true,
+							"connection": true
+						}
+					},
+					"request": {
+						"auth": {
+							"type": "noauth"
+						},
+						"method": "GET",
+						"header": [],
+						"body": {
+							"mode": "formdata",
+							"formdata": []
+						},
+						"url": {
+							"raw": "{{api_url}}/objects?id=1&id=2",
+							"host": [
+								"{{api_url}}"
+							],
+							"path": [
+								"objects"
+							],
+							"query": [
+								{
+									"key": "id",
+									"value": "1"
+								},
+								{
+									"key": "id",
+									"value": "2"
+								}
+							]
+						}
+					},
+					"response": []
+				}
+			],
+			"id": "16ac2060-a6de-4843-a0b4-6973213cf60e"
+		},
+		{
+			"name": "Create Object",
+			"item": [
+				{
+					"name": "Create Object",
+					"event": [
+						{
+							"listen": "test",
+							"script": {
+								"id": "171c8162-00e2-4c4e-8202-c6520a706ff4",
+								"exec": [
+									"var jsonData = pm.response.json();\r",
+									"\r",
+									"pm.test(\"Status Code is 200\", function () {\r",
+									"    pm.response.to.have.status(200);\r",
+									"});\r",
+									"\r",
+									"pm.test(\"check values (CreatedAt/Price/Email)\", function () {\r",
+									"    var moment = require('moment'),\r",
+									"        UTCTimestamp = moment().utc().subtract(1,'minutes').toString();\r",
+									"    \r",
+									"    // compare 1 minute before now < createdAt to ensure timestamp is correct\r",
+									"    pm.expect(Date.parse(jsonData.createdAt)).to.be.above(Date.parse(UTCTimestamp));\r",
+									"    \r",
+									"    //price should be greater than $0\r",
+									"    pm.expect(jsonData.data.price).to.be.above(0);\r",
+									" \r",
+									"    //email should include \"@\" and \".\"\r",
+									"    pm.expect(jsonData.data.email).is.string;\r",
+									"    pm.expect(jsonData.data.email).to.contain(\"@\");\r",
+									"    pm.expect(jsonData.data.email).to.contain(\".\");\r",
+									"\r",
+									"});"
+								],
+								"type": "text/javascript"
+							}
+						},
+						{
+							"listen": "prerequest",
+							"script": {
+								"id": "d68c1819-918a-4e29-a41d-04250988877a",
+								"exec": [
+									""
+								],
+								"type": "text/javascript"
+							}
+						}
+					],
+					"id": "59640444-ce99-4eaa-8ecf-f7c0b668907a",
+					"protocolProfileBehavior": {
+						"disableBodyPruning": true,
+						"disabledSystemHeaders": {
+							"host": true,
+							"user-agent": true,
+							"accept": true,
+							"accept-encoding": true,
+							"connection": true
+						}
+					},
+					"request": {
+						"auth": {
+							"type": "noauth"
+						},
+						"method": "POST",
+						"header": [],
+						"body": {
+							"mode": "raw",
+							"raw": "{\r\n    \"name\": \"{{$randomCatchPhrase}}\", \r\n    \"data\": {\r\n        \"year\": \"{{$randomInt}}\",\r\n        \"price\": {{$randomPrice}},\r\n        \"email\" : \"{{$randomEmail}}\",\r\n        \"CPU model\": \"{{$randomProductName}}\"\r\n    }\r\n}",
+							"options": {
+								"raw": {
+									"language": "json"
+								}
+							}
+						},
+						"url": "{{api_url}}/objects"
+					},
+					"response": [
+						{
+							"id": "55ea7dc4-3ac7-4501-ae34-4b7ae093a6f9",
+							"name": "Create Object",
+							"originalRequest": {
+								"method": "POST",
+								"header": [],
+								"body": {
+									"mode": "raw",
+									"raw": "{\r\n    \"name\": \"{{$randomCatchPhrase}}\", \r\n    \"data\": {\r\n        \"year\": \"{{$randomInt}}\",\r\n        \"price\": {{$randomPrice}},\r\n        \"email\" : \"{{$randomEmail}}\",\r\n        \"CPU model\": \"{{$randomProductName}}\"\r\n    }\r\n}",
+									"options": {
+										"raw": {
+											"language": "json"
+										}
+									}
+								},
+								"url": "{{api_url}}/objects"
+							},
+							"status": "OK",
+							"code": 200,
+							"_postman_previewlanguage": "json",
+							"header": [
+								{
+									"key": "Date",
+									"value": "Wed, 11 Oct 2023 01:08:00 GMT"
+								},
+								{
+									"key": "Content-Type",
+									"value": "application/json"
+								},
+								{
+									"key": "Transfer-Encoding",
+									"value": "chunked"
+								},
+								{
+									"key": "Connection",
+									"value": "keep-alive"
+								},
+								{
+									"key": "Vary",
+									"value": "Origin"
+								},
+								{
+									"key": "Vary",
+									"value": "Access-Control-Request-Method"
+								},
+								{
+									"key": "Vary",
+									"value": "Access-Control-Request-Headers"
+								},
+								{
+									"key": "CF-Cache-Status",
+									"value": "DYNAMIC"
+								},
+								{
+									"key": "Report-To",
+									"value": "{\"endpoints\":[{\"url\":\"https:\\/\\/a.nel.cloudflare.com\\/report\\/v3?s=RhL%2Bhxasux%2F3jd7hlmaRhT1sO%2B0sru0REpZbLC%2ByrHCaLSDyiDK%2FFiPKs2JLUSr1QNkSJtSnhk7wHF%2FwwW7mgOXwgXK3mDZRWPCnd%2FV0qVGI5c4Yce3qsCqntsWLvy0nMuCSO8zm\"}],\"group\":\"cf-nel\",\"max_age\":604800}"
+								},
+								{
+									"key": "NEL",
+									"value": "{\"success_fraction\":0,\"report_to\":\"cf-nel\",\"max_age\":604800}"
+								},
+								{
+									"key": "Server",
+									"value": "cloudflare"
+								},
+								{
+									"key": "CF-RAY",
+									"value": "8143359e089938a4-IAD"
+								},
+								{
+									"key": "alt-svc",
+									"value": "h3=\":443\"; ma=86400"
+								}
+							],
+							"cookie": [],
+							"responseTime": null,
+							"body": "{\n    \"id\": \"ff8081818b1b4123018b1c46bf860535\",\n    \"name\": \"De-engineered scalable local area network\",\n    \"createdAt\": \"2023-10-11T01:08:00.519+00:00\",\n    \"data\": {\n        \"year\": \"43\",\n        \"price\": 734.75,\n        \"email\": \"Tyrell81@yahoo.com\",\n        \"CPU model\": \"Ergonomic Concrete Shirt\"\n    }\n}"
+						}
+					]
+				}
+			],
+			"id": "8d9d8ad2-f427-42e9-a8e0-11a5860856d7"
+		},
+		{
+			"name": "Modify Object",
+			"item": [
+				{
+					"name": "Get Valid Object Copy",
+					"event": [
+						{
+							"listen": "prerequest",
+							"script": {
+								"id": "db7ed652-0aff-4a32-8fd6-f66bb8cae4b0",
+								"exec": [
+									"const createObject = {\r",
+									"  url: pm.environment.get(\"api_url\") + \"/objects\",\r",
+									"  method: 'POST',\r",
+									"  header: 'Content-Type:application/json',\r",
+									"  body: {\r",
+									"    mode: 'raw',\r",
+									"    raw: JSON.stringify({ \r",
+									"        \"name\": pm.variables.replaceIn(\"{{$randomCatchPhrase}}\"), \r",
+									"        \"data\": {\r",
+									"            \"year\": pm.variables.replaceIn(\"{{$randomInt}}\"),\r",
+									"            \"price\": pm.variables.replaceIn(\"{{$randomPrice}}\"),\r",
+									"            \"email\" : pm.variables.replaceIn(\"{{$randomEmail}}\"),\r",
+									"            \"CPU model\": pm.variables.replaceIn(\"{{$randomProductName}}\")\r",
+									"        }\r",
+									"    })\r",
+									"  }\r",
+									"};\r",
+									"\r",
+									"pm.sendRequest(createObject, function (err, res) {\r",
+									"    if (err) {\r",
+									"        console.log(err);\r",
+									"    }\r",
+									"\r",
+									"    pm.expect(err).is.null;\r",
+									"    pm.variables.set(\"new_object_id\", res.json().id)\r",
+									"});"
+								],
+								"type": "text/javascript"
+							}
+						},
+						{
+							"listen": "test",
+							"script": {
+								"id": "4f19f193-6d60-4c79-b1cb-1f5ff5f57dc9",
+								"exec": [
+									"var jsonData = pm.response.json();\r",
+									"\r",
+									"pm.test(\"Status Code is 200\", function () {\r",
+									"    // Ensure the response was successful\r",
+									"    pm.response.to.have.status(200);\r",
+									"});\r",
+									"\r",
+									"// use lodash map to get a flat array of all the returned object ids\r",
+									"var object_ids = _.map(jsonData, 'id');\r",
+									"\r",
+									"pm.test(\"Expected Object guid is in the returned array\", function () {\r",
+									"    pm.expect(object_ids).to.include(pm.variables.get(\"object_id\"));\r",
+									"});"
+								],
+								"type": "text/javascript"
+							}
+						}
+					],
+					"id": "6e5e5fb2-e747-426b-8b39-02bada94151a",
+					"protocolProfileBehavior": {
+						"disableBodyPruning": true,
+						"disabledSystemHeaders": {
+							"host": true,
+							"user-agent": true,
+							"accept": true,
+							"accept-encoding": true,
+							"connection": true
+						}
+					},
+					"request": {
+						"auth": {
+							"type": "noauth"
+						},
+						"method": "GET",
+						"header": [],
+						"body": {
+							"mode": "formdata",
+							"formdata": []
+						},
+						"url": "{{api_url}}/objects/{{new_object_id}}"
+					},
+					"response": []
+				}
+			],
+			"id": "dbbb1648-3e61-4b09-88d7-9ba2f2ec680a"
+		},
+		{
+			"name": "Patch Modify Object",
+			"item": [],
+			"id": "b16fc75b-c866-42b6-a7a6-9bb4f7da17c8"
+		},
+		{
+			"name": "Delete Object",
+			"item": [
+				{
+					"name": "Delete Object",
+					"event": [
+						{
+							"listen": "prerequest",
+							"script": {
+								"id": "db7ed652-0aff-4a32-8fd6-f66bb8cae4b0",
+								"exec": [
+									"const createObject = {\r",
+									"  url: pm.environment.get(\"api_url\") + \"/objects\",\r",
+									"  method: 'POST',\r",
+									"  header: 'Content-Type:application/json',\r",
+									"  body: {\r",
+									"    mode: 'raw',\r",
+									"    raw: JSON.stringify({ \r",
+									"        \"name\": pm.variables.replaceIn(\"{{$randomCatchPhrase}}\"), \r",
+									"        \"data\": {\r",
+									"            \"year\": pm.variables.replaceIn(\"{{$randomInt}}\"),\r",
+									"            \"price\": pm.variables.replaceIn(\"{{$randomPrice}}\"),\r",
+									"            \"email\" : pm.variables.replaceIn(\"{{$randomEmail}}\"),\r",
+									"            \"CPU model\": pm.variables.replaceIn(\"{{$randomProductName}}\")\r",
+									"        }\r",
+									"    })\r",
+									"  }\r",
+									"};\r",
+									"\r",
+									"pm.sendRequest(createObject, function (err, res) {\r",
+									"    if (err) {\r",
+									"        console.log(err);\r",
+									"    }\r",
+									"\r",
+									"    pm.expect(err).is.null;\r",
+									"    pm.variables.set(\"new_object_id\", res.json().id)\r",
+									"});"
+								],
+								"type": "text/javascript"
+							}
+						},
+						{
+							"listen": "test",
+							"script": {
+								"id": "4f19f193-6d60-4c79-b1cb-1f5ff5f57dc9",
+								"exec": [
+									"var jsonData = pm.response.json();\r",
+									"\r",
+									"pm.test(\"Status Code is 200\", function () {\r",
+									"    // Ensure the response was successful\r",
+									"    pm.response.to.have.status(200);\r",
+									"});\r",
+									"\r",
+									"pm.test(\"Expected message Object guid is deleted\", function () {\r",
+									"    pm.expect(jsonData.message).to.contains(pm.variables.get(\"new_object_id\"));\r",
+									"    pm.expect(jsonData.message).to.include(\"has been deleted.\")\r",
+									"});"
+								],
+								"type": "text/javascript"
+							}
+						}
+					],
+					"id": "07149e64-a86d-45c0-b5ea-d04494376fcc",
+					"protocolProfileBehavior": {
+						"disableBodyPruning": true,
+						"disabledSystemHeaders": {
+							"host": true,
+							"user-agent": true,
+							"accept": true,
+							"accept-encoding": true,
+							"connection": true
+						}
+					},
+					"request": {
+						"auth": {
+							"type": "noauth"
+						},
+						"method": "DELETE",
+						"header": [],
+						"body": {
+							"mode": "formdata",
+							"formdata": []
+						},
+						"url": "{{api_url}}/objects/{{new_object_id}}"
+					},
+					"response": []
+				}
+			],
+			"id": "b8b52745-bacf-4d54-af21-584da6b75561"
+		}
+	]
+}
